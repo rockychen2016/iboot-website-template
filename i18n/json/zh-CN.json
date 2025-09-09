@@ -1,0 +1,83 @@
+{
+    "Components": {
+        "MessageBox": {
+            "default_title": "系统消息",
+            "btn_confirm": "确定",
+            "btn_cancel": "取消",
+            "success": "操作成功!"
+        },
+        "Button": {
+            "btn_confirm": "确定",
+            "btn_cancel": "取消",
+            "btn_close": "关闭",
+            "btn_logout": "退出系统",
+            "btn_search": "查询",
+            "btn_delete": "删除",
+            "btn_delete_all": "删除所有",
+            "btn_add": "新增",
+            "btn_add1": "新建",
+            "btn_add2": "添加",
+            "btn_edit": "修改",
+            "btn_sort": "排序",
+            "btn_refresh": "刷新",
+            "btn_resetpwd": "重置密码",
+            "btn_release": "发布",
+            "btn_clean": "清除",
+            "btn_create": "确认创建",
+            "btn_move": "移动",
+            "btn_permission": "权限",
+            "btn_search_test": "搜索测试",
+            "btn_back": "返回",
+            "btn_submit": "提交",
+            "btn_save": "保存",
+            "btn_reset": "重试",
+            "btn_start": "启用",
+            "btn_stop": "停用",
+            "btn_visible1":"可见",
+            "btn_visible2":"不可见",
+            "btn_default":"设为默认"
+        },
+        "UploadImage": {
+            "FILE_COUNT_ERROR": "最多一次选择{count}个文件上传",
+            "FILE_SIZE_ERROR": "上传的文件不能超过{maxSize}K!"
+        },
+        "ChipList": {
+            "add": "新增",
+            "emptytips": "暂没有数据"
+        },
+        "PageInfoPagination": "记录总数({total})，第({page})页 / 共({totalPage})页"
+    },
+    "Data": {
+        "action_success": "操作成功",
+        "action_fail": "操作失败",
+        "loading": "加载中...",
+        "empty_data": "暂没有数据",
+        "true": "是",
+        "false": "否",
+        "Sex": {
+            "0": "未知",
+            "1": "男",
+            "2": "女"
+        }
+    },
+    "Error": {
+        "405": "禁止访问",
+        "404": "没有该接口",
+        "409": "TOKEN已失效",
+        "410": "Content-type错误",
+        "411": "Invalid multipart: missing boundary",
+        "0": "操作成功!",
+        "-1000": "您的浏览器可能有问题，请更换浏览器再操作，推荐使用Chrome浏览器!"
+    },
+    "Website":{
+        "TopNavbar":{
+            "Home":"首页",
+            "Products":"产品",
+            "About":"关于我们",
+            "Contact":"联系方式"
+        },
+        "Account":{
+            "Logout":"退出"
+        }
+    }
+}

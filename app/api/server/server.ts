@@ -1,0 +1,302 @@
+import { getHttpOpts, getHttpOptsByHeaders, HttpClient, HttpToken, ResultModel } from "@/utils/http";
+import { NextRequest, NextResponse } from "next/server";
+import { urlParamToJson } from "@/utils/string";
+import { API, APIMAP } from "./api";
+import { cookies, headers } from "next/headers";
+import { routerSetLocale } from "@/i18n/service";
+import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { ChannelPageContent, HomePageContent, ProductPageContent } from "./types/web-page";
+
+export const startRequest = async (method: 'GET' | 'POST', request: NextRequest) => {
+    const m: string = request.nextUrl.searchParams.get('m') ?? 'unkown';
+    const url = APIMAP[m];
+    if (url.length === 0) {
+        const error: ResultModel<unknown> = {
+            code: 404,
+            success: false
+        }
+        return NextResponse.json(error);
+    }
+    const httpOpts = getHttpOpts(request);
+    httpOpts.userType = '1';     //C端用户注册
+    const http = new HttpClient(httpOpts);
+    let token: HttpToken | undefined = undefined;
+    if (url.startsWith("admin/") || url.startsWith("api/")) {
+        token = http.getToken(request);
+        if (token.username.length == 0 || token.token.length == 0) {
+            const error: ResultModel<unknown> = {
+                code: 409,
+                success: false
+            }
+            return NextResponse.json(error);
+        }
+    }
+    let res = null;
+    if (method === 'GET') {
+        const body = request.nextUrl.searchParams.toString();
+        const params = urlParamToJson(body.toString(), ['m']);
+        console.debug('Get >>>> ', JSON.stringify(params));
+        res = await http.get({
+            url: url,
+            data: params,
+            token: token
+        })
+    } else {
+        const contentType = request.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+            const data = await request.json();
+            res = await http.post({
+                url: url,
+                data: data,
+                token: token
+            });
+        } else if (contentType.includes("multipart/form-data")) {
+            console.debug('multipart/form-data')
+            const boundaryMatch = contentType.match(/boundary=([^\s;]+)/);
+            if (!boundaryMatch) {
+                const error: ResultModel<unknown> = {
+                    code: 411,
+                    success: false
+                }
+                return NextResponse.json(error);
+            }
+            const boundary = boundaryMatch[1];
+            const copyRequest = request.clone();
+            const formData = await request.formData();
+            const buffer = await copyRequest.arrayBuffer();
+            //eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const data: Record<string, any> = {
+                "boundary": boundary,
+                "buffer": Buffer.from(buffer)
+            }
+            formData.keys().forEach(key => {
+                if (key != 'file') {
+                    data[key] = formData.get(key);
+                }
+            })
+            res = await http.post({
+                url: url,
+                data: data,
+                token: token
+            });
+
+        } else {
+            const error: ResultModel<unknown> = {
+                code: 410,
+                success: false
+            }
+            return NextResponse.json(error);
+        }
+    }
+    const response = NextResponse.json(res);
+    if (res.success) {
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data: any = res.data;
+        switch (m) {
+            case APIMAP[API.curWebsite]:
+                const website = data as Website;
+                const lang = website.language.replaceAll('_', '-');
+                routerSetLocale(response, lang as I18N, website.id, website.websiteNo);
+                return response;
+            case APIMAP[API.login]:
+                return http.setToken(data, response);
+            case APIMAP[API.logout]:
+                return http.cleanToken(response);
+            default:
+                break;
+        }
+    }
+    return response;
+}
+
+const doGet = async <T>(api: API, opts?: {
+    data?: Record<string, string>,
+    callback?: (result: T, cookie: ReadonlyRequestCookies) => void
+}) => {
+    const url = APIMAP[API[api]];
+    const heads = await headers();
+    const cookieStore = await cookies();
+    const http = new HttpClient(getHttpOptsByHeaders(heads));
+    const token: HttpToken | undefined = http.getTokenByCookies(cookieStore);
+    const res = await http.get<T>({
+        "url": url,
+        "data": opts?.data,
+        "token": token
+    });
+    if (res.success) {
+        const data = res.data!;
+        if (opts?.callback) {
+            opts.callback(data, cookieStore);
+        }
+        return data;
+    }
+    throw res.msg
+}
+
+/**
+ * 获取I18N网站列表
+ * @returns I18N网站列表
+ */
+export const GetI18NList = async () => {
+    const res = await doGet<Array<I18NWebSite>>(API.i18nList)
+    if (res) {
+        return res
+    }
+    return [];
+}
+
+/**
+ * 获取当前网站
+ * @returns 
+ */
+export const GetCurWebsite = async () => {
+    return await doGet<Website>(API.curWebsite);
+}
+
+const metaData = (name: string, seo?: SeoProps) => {
+    return {
+        title: {
+            default: `${name}-${(seo?.title || ''.length > 0 ? `-${seo?.title}` : '')}`,
+            template: `%s - ${name}`,
+        },
+        keywords: seo?.keywords ?? '',
+        description: seo?.description ?? '',
+        icons: {
+            icon: "/favicon.ico",
+        },
+    }
+}
+
+/**
+ * 获取网站元信息
+ * @returns 
+ */
+export const GetHomeWeb = async (): Promise<HomePageContent> => {
+    const res = await GetCurWebsite();
+    if (res) {
+        return {
+            metadata: metaData(res.name, res.seoProps),
+            content: res
+        }
+    }
+    throw Error('An error occurred on the web page.')
+}
+
+export const GetChannelWeb = async (channelId: string): Promise<ChannelPageContent> => {
+    const res = await doGet<WebChannel>(API.getChannel, { data: { "channelId": channelId } })
+    if (res) {
+        return {
+            metadata: metaData(res.name, res.seoProps),
+            content: res
+        }
+    }
+    throw Error('An error occurred on the web page.')
+}
+
+export const GetProductDetailWeb = async (productId: string, attachmentType?: AttachmentType): Promise<ProductPageContent> => {
+    const res = await doGet<ProductContent>(API.getProduct, {
+        data: {
+            "proId": productId,
+            "attachmentType": attachmentType ?? ''
+        }
+    });
+    if (res) {
+        return {
+            metadata: metaData(res.proName, res.seoProps),
+            content: res
+        }
+    }
+    throw Error('An error occurred on the web page.')
+}
+
+/**
+ * 获取栏目列表
+ * @param channelNo 如果为空则取根栏目,否则获取下一级栏目(只是一级)
+ * @returns 
+ */
+export const GetWebChannelList = async (channelNo?: string) => {
+    const res = await doGet<Array<WebChannel>>(API.getChannelList, {
+        data: {
+            "channelNo": channelNo ?? ''
+        }
+    });
+    if (res) {
+        return [...res]
+    }
+    return []
+}
+
+
+
+/**
+ * 分页获取产品
+ * @param param0
+ * @returns 
+ */
+export const GetProductForPage = async ({
+    channelId, //栏目ID
+    keyword,
+    pageNo,
+    pageSize,
+    sortBy = 'createTime',
+    sort = 'DESC'
+}: Readonly<{
+    channelId?: string,
+    keyword?: string,
+    pageNo: number,
+    pageSize: number,
+    sortBy?: string,
+    sort?: 'DESC' | 'ASC' | ''
+}>) => {
+    return await doGet<PageInfo<ProductContent>>(API.searchProductForPage, {
+        data: {
+            pageNo: pageNo.toString(),
+            pageSize: pageSize.toString(),
+            channelId: channelId ?? '',
+            keyword: keyword ?? '',
+            sort: sort ?? '',
+            sortBy: sortBy ?? ''
+        }
+    });
+}
+
+/**
+ * 通过分组编号分页获取产品
+ * @param param0 
+ * @returns 
+ */
+export const GetProductForPageByGroup = async ({
+    groupNo,
+    pageNo,
+    pageSize
+}: Readonly<{
+    groupNo: string,
+    pageNo: number,
+    pageSize: number
+}>) => {
+    return await doGet<PageInfo<ProductContent>>(API.searchProductForPageByGroup, {
+        data: {
+            pageNo: pageNo.toString(),
+            pageSize: pageSize.toString(),
+            groupNo: groupNo
+        }
+    });
+}
+
+/**
+ * 通过分组编号获取产品列表
+ * @param groupId 
+ * @returns 
+ */
+export const GetProductsByGroup = async (groupId: string) => {
+    return await doGet<Array<ProductContent>>(API.searchProductByGroup, {
+        data: {
+            groupId: groupId
+        }
+    });
+}
+
+
+
+
+
