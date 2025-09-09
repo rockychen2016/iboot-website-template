@@ -43,7 +43,8 @@
     "dev": "next dev --turbopack -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint --fix"
+    "lint": "eslint --fix",
+    "post-create": "node scripts/create-env-files.js"
   },
   "dependencies": {
     "@heroui/button": "2.2.24",
