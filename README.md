@@ -33,9 +33,7 @@ You can create a new project using this template in several ways:
 #### Using npx (Recommended)
 
 ```bash
-npx create-next-app@latest my-website -e https://github.com/rockychen2016iboot-website-template 
-或（OR）
-npx create-next-app@latest my-website -e https://gitee.com/chensc/iboot-website-template
+npx create-next-app@latest my-website -e https://github.com/rockychen2016iboot-website-template
 cd my-website
 npm install
 npm run dev
