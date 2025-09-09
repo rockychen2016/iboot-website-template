@@ -1,5 +1,5 @@
 {
-  "name": "iboot-wcms-website-template",
+  "name": "iboot-website-template",
   "version": "1.0.0",
   "description": "A website template based on Next.js 14 (app directory) and HeroUI v2, the content of the website relies on iboot-wcms management",
   "keywords": [
@@ -40,7 +40,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "dev": "next dev --turbopack -p 3001",
+    "dev": "next dev --turbopack -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint --fix",
