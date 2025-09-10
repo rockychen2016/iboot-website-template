@@ -1,7 +1,6 @@
-//const fs = require('fs');
-//const path = require('path');
-import { fs } from 'fs';
-import { path } from 'path';
+const fs = require('fs');
+const path = require('path');
+
 const envFiles = ['.env.development', '.env.local', '.env.production'];
 
 envFiles.forEach(file => {
