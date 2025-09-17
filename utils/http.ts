@@ -2,7 +2,6 @@ import md5 from "js-md5";
 
 import { NextRequest, NextResponse } from "next/server";
 
-import { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import CryptoJS from 'crypto-js';
 import { ErrorToast, SuccessToast } from "./toast";
@@ -11,6 +10,8 @@ import { randomString, urlDecode, urlParamToJson } from "./string";
 import { User } from "@/app/api/server/types/user";
 import { _CURRENT_WEBSITE_KEY } from "@/providers/website-provider";
 import { _DEVICE_ID_KEY } from "@/providers/device-provider";
+import { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
+import { defaultLocale } from "@/i18n/config";
 
 type CSRFToken = {
     csrfToken: string,
@@ -40,43 +41,43 @@ export type ResultStream = ReadableStream<Uint8Array>
 
 export interface ClientGetParams {
     data?: Record<string, string>,
-    useCache?: boolean
+    useCache?: boolean,
+    heads?: Record<string, string>
 }
 
 export interface ClientPostParams {
-    data?: Record<string, string> | FormData | UIFormEntities
+    data?: Record<string, string> | FormData | UIFormEntities,
+    heads?: Record<string, string>
 }
 
 export const getHttpOpts = (request: NextRequest): HttpOpts => {
     return {
-        lang: request.headers.get('lang') ?? undefined,
         deviceId: request.headers.get('dvid') ?? undefined,
+        lang: request.headers.get('lang') ?? undefined,
         webid: request.headers.get('webid') ?? undefined,
         webno: request.headers.get('webno') ?? undefined,
     }
 }
 
-export const getHttpOptsByHeaders = (headers: ReadonlyHeaders): HttpOpts => {
+export const getHttpOptsByHeaders = (cookie: ReadonlyRequestCookies): HttpOpts => {
+
     return {
-        lang: headers.get('lang') ?? undefined,
-        deviceId: headers.get('dvid') ?? undefined,
-        webid: headers.get('webid') ?? undefined,
-        webno: headers.get('webno') ?? undefined
+        deviceId: cookie.get('NEXT_DEVICE_ID')?.value ?? undefined,
+        lang: cookie.get('NEXT_LOCALE')?.value ?? undefined,
+        webid: cookie.get('NEXT_WEBSITE_ID')?.value ?? undefined,
+        webno: cookie.get('NEXT_WEBSITE_NO')?.value ?? undefined,
     }
 }
 
-const getRequestHead = (): {
-    dvid: string,
-    webid: string,
-    webno: string,
-} => {
+const getRequestHead = (): Record<string, string> => {
     const devideId = localStorage.getItem(_DEVICE_ID_KEY) ?? ''
     const json = localStorage.getItem(_CURRENT_WEBSITE_KEY);
     const curWebsiteNumber: CurWebsiteNumbers | null = json != null ? JSON.parse(json) : null;
     return {
         dvid: devideId,
         webid: curWebsiteNumber?.websiteId ?? '',
-        webno: curWebsiteNumber?.websiteNo ?? ''
+        webno: curWebsiteNumber?.websiteNo ?? '',
+        lang: curWebsiteNumber?.language ?? ''
     }
 };
 
@@ -97,9 +98,20 @@ export const get = async <T>(url: string, opts?: ClientGetParams): Promise<Resul
             api += `?${params}`
         }
     }
+    const headers: Record<string, string> = getRequestHead();
+    const heads = opts?.heads;
+    if (heads) {
+        for (const field in heads) {
+            const value = heads[field];
+            if (value) {
+                headers[field] = value;
+            }
+        }
+    }
+
     const response = await fetch(api, {
         method: 'GET',
-        headers: getRequestHead(),
+        headers: headers,
         cache: opts?.useCache ? 'force-cache' : 'default'
     });
     if (response.ok) {
@@ -124,6 +136,7 @@ export const iGet = async <T>(url: string, opts?: ClientGetParams): Promise<T | 
 export const post = async <T>(url: string, opts?: ClientPostParams): Promise<ResultModel<T>> => {
     const api = getClientUrl(url);
     const data = opts?.data ?? {};
+    const heads = opts?.heads;
     let body: string | FormData;
     const proxyHeaders = new Headers(getRequestHead());
     if (!(data instanceof FormData)) {
@@ -131,6 +144,14 @@ export const post = async <T>(url: string, opts?: ClientPostParams): Promise<Res
         proxyHeaders.set('Content-Type', 'application/json');
     } else {
         body = data;
+    }
+    if (heads) {
+        for (let field in heads) {
+            const value = heads[field];
+            if (value) {
+                proxyHeaders.set(field, value);
+            }
+        }
     }
     const response = await fetch(api, {
         method: 'POST',
@@ -183,7 +204,7 @@ export class HttpClient {
         this.userType = userType ?? '0';
         this.userFrom = process.env.USER_FROM || '1';
         this.deviceId = deviceId ?? randomString(10);
-        this.lang = lang ?? 'zh-CN';
+        this.lang = lang ?? defaultLocale;
         this.webid = webid ?? ''
         this.webno = webno ?? ''
         this._isDebug = process.env.NODE_ENV != 'production';
@@ -289,9 +310,9 @@ export class HttpClient {
         });
         const paramsStr: string = res.join("&");
         const str = md5.md5((paramsStr + _apiKey).toLocaleUpperCase());
-        if (this._isDebug) {
-            console.log("排序后的参数>>>", paramsStr, ', md5 >>> ', str);
-        }
+        // if (this._isDebug) {
+        //     console.log("排序后的参数>>>", paramsStr, ', md5 >>> ', str);
+        // }
         return str;
     }
 
@@ -361,8 +382,10 @@ export class HttpClient {
         //const uType = token?.utype ?? this.userType;
         const api = `${this.getApiUrl(url)}?${urlParams.toString()}` //`${this.baseUrl}/${url}?${urlParams.toString()}`.format(uType === '0' ? '' : '/b');
         if (this._isDebug) {
+            console.log("===start==================================================================================")
             console.log('GET URL >>> ', api);
             console.log('HTTP HEADERS >>>', JSON.stringify(headers));
+            console.log("=====================================================================================end==")
         }
         try {
             const res = await fetch(api, {
@@ -409,8 +432,10 @@ export class HttpClient {
         }
         const api = this.getApiUrl(url);
         if (this._isDebug) {
-            console.debug('GET URL >>> ', api);
-            console.debug('HTTP HEADERS >>> ', JSON.stringify(headers));
+            console.log("===start==================================================================================")
+            console.log('POST URL >>> ', api);
+            console.log('HTTP HEADERS >>>', JSON.stringify(headers));
+            console.log("=====================================================================================end==")
         }
         try {
             const url = buffer ? `${api}?${urlParams}` : api;
@@ -422,9 +447,9 @@ export class HttpClient {
             });
             if (res.ok) {
                 const result = await res.json();
-                if (this._isDebug) {
-                    console.log(JSON.stringify(result));
-                }
+                // if (this._isDebug) {
+                //     console.log(JSON.stringify(result));
+                // }
                 return result;
             }
             return {
@@ -537,7 +562,7 @@ export class HttpClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setToken(data: User & { token: string, extFields: Record<string, any> }, response: NextResponse) {
-        const { id, name, username, nickname, sex, headImg, token, extFields, lastLoginTime, tokenExpired, deviceId, userType } = data;
+        const { id, name, username, nickname, sex, headImg, token, lastLoginTime, tokenExpired, deviceId, userType } = data;
         const loginUser: User = {
             id: id,
             name: name,

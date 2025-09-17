@@ -7,21 +7,16 @@ import {
   NavbarItem,
   NavbarMenuItem,
 } from "@heroui/navbar";
-import { Kbd } from "@heroui/kbd";
 import { Link } from "@heroui/link";
-import { Input } from "@heroui/input";
 import { link as linkStyles } from "@heroui/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
-
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
-import {
-  SearchIcon,
-} from "@/components/icons";
 import Logo from "./logo";
 import I18nList from "./i18n-list";
 import { GetI18n } from "@/i18n/request";
+import SearchInput from "./search-input";
 
 
 export const Navbar = ({
@@ -31,26 +26,6 @@ export const Navbar = ({
   lang: string,
   i18nList: Array<I18NWebSite>
 }) => {
-  const searchInput = (
-    <Input
-      aria-label="Search"
-      classNames={{
-        inputWrapper: "bg-default-100",
-        input: "text-sm",
-      }}
-      endContent={
-        <Kbd className="hidden lg:inline-block" keys={["command"]}>
-          K
-        </Kbd>
-      }
-      labelPlacement="outside"
-      placeholder="Search..."
-      startContent={
-        <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
-      }
-      type="search"
-    />
-  );
 
   return (
     <HeroUINavbar maxWidth="xl" position="sticky">
@@ -86,7 +61,7 @@ export const Navbar = ({
         <NavbarItem className="hidden sm:flex gap-2">
           <ThemeSwitch />
         </NavbarItem>
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
+        <NavbarItem className="hidden lg:flex"><SearchInput /></NavbarItem>
         <div className="w-40">
           <I18nList data={i18nList} lang={lang} />
         </div>
@@ -98,7 +73,7 @@ export const Navbar = ({
       </NavbarContent>
 
       <NavbarMenu>
-        {searchInput}
+        <SearchInput />
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig.navMenuItems.map(async (item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>

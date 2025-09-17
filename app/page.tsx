@@ -5,17 +5,16 @@ import CustomersSay from "@/components/page/home/customers-say";
 import TechnologyWrap from "@/components/page/home/technology-wrap";
 import ProductCardWrap from "@/components/page/home/product-card-wrap";
 import { GetI18n } from "@/i18n/request";
-import { cookies } from "next/headers";
+import { getLocale } from "next-intl/server";
 
 const page = async () => GetHomeWeb();
 export const metadata = async () => (await page()).metadata
 
 export default async function Home() {
-  const cookie = await cookies();
-  const lang = cookie.get('NEXT_LOCALE')?.value;
+  const locale = await getLocale();
   let recommended: Array<ProductContent> = [];
-  //console.log('----------------------', lang)
-  if (!lang || lang == 'ru') {
+
+  if (!locale || locale == 'ru') {
     recommended = [...await GetProductsByGroup('C35729751662530560')]
   } else {
     recommended = [...await GetProductsByGroup('C35074930030809088')]
@@ -24,7 +23,7 @@ export default async function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="container mx-auto py-16 md:py-24 flex flex-col items-center text-center">
+      <section className="container mx-auto py-16 md:py-24 flex flex-col items-center text-center shadow-lg px-2 rounded-md dark:shadow-none dark:px-0">
         <h1 className="text-4xl md:text-6xl font-bold mb-6">{await GetI18n("Website.Page.Home", "section_title")}</h1>
         <p className="text-xl md:text-2xl mb-10 max-w-3xl">
           {
@@ -35,7 +34,7 @@ export default async function Home() {
           {/* <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full transition duration-300">
             Shop Now
           </button> */}
-          <a href="/about" className="bg-transparent border-2 border-white hover:bg-white hover:text-black text-white font-bold py-3 px-8 rounded-full transition duration-300">
+          <a href="/about" className="bg-transparent border-2   dark:border-white hover:opacity-50 hover:text-black dark:text-white font-bold py-3 px-8 rounded-full transition duration-300">
             {
               await GetI18n('Components.Button', 'btn_learn_more')
             }
@@ -58,7 +57,7 @@ export default async function Home() {
 
         </div>
         <div className="py-5 flex justify-center items-center">
-          <a href="/product" className="bg-transparent border-2 border-white hover:bg-white hover:text-black text-white font-bold py-3 px-8 rounded-full transition duration-300">
+          <a href="/product" className="bg-transparent border-2 dark:border-white hover:opacity-50 dark:text-white font-bold py-3 px-8 rounded-full transition duration-300">
             {
               await GetI18n('Components.Button', 'btn_learn_more')
             }
@@ -72,7 +71,7 @@ export default async function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="container mx-auto py-16">
+      <section className="container mx-auto py-16 shadow-2xl px-2 dark:shadow-none dark:px-0">
         <CustomersSay />
       </section>
 

@@ -36,13 +36,13 @@ export default function Subscribe() {
     }, [email, iAlert, tips])
 
     return (
-        <div className="bg-gradient-to-r from-purple-700 to-indigo-800 rounded-3xl p-12 text-center">
+        <div className="dark:bg-gradient-to-r from-purple-700 to-indigo-800 rounded-3xl p-12 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
                 {
                     t('title')
                 }
             </h2>
-            <p className="text-xl text-gray-200 mb-10 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-200 mb-10 max-w-3xl mx-auto">
                 {
                     t('desc')
                 }

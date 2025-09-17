@@ -51,10 +51,10 @@ function Reviews({
 
         <div className="space-y-8 mb-8">
             {data.map((review) => (
-                <div key={review.id} className="bg-gray-800 rounded-2xl p-8">
+                <div key={review.id} className="bg-gray-400 dark:bg-gray-800 rounded-2xl p-8">
                     <div className="flex justify-between items-start mb-4">
                         <h3 className="text-lg font-bold">{review.name}</h3>
-                        <span className="text-gray-400 text-sm">{review.createTime}</span>
+                        <span className="text-gray-800 dark:text-gray-400 text-sm">{review.createTime}</span>
                     </div>
                     <div className="flex items-center mb-4">
                         <div className="flex">
@@ -127,7 +127,7 @@ function ReviewsForm({
     }, [])
 
     return (
-        <div className="bg-gray-800 rounded-2xl flex flex-col gap-6 p-8 mb-12">
+        <div className="bg-gray-300 dark:bg-gray-800 rounded-2xl flex flex-col gap-6 p-8 mb-12">
             <h3 className="text-xl font-bold">{t('title')}</h3>
             {
                 submitSuccess ? <Alert color="success" title={t('success')} /> : null 

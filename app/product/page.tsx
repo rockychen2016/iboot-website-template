@@ -3,14 +3,11 @@ import ProductCategoryWrap from '@/components/page/product/product-category-wrap
 import ProductListItemWrap from '@/components/page/product/product-list-item-wrap';
 import { GetChannelWeb, GetProductForPage } from '../api/server/server';
 import { Metadata } from 'next';
-import { cookies } from 'next/headers';
-import { GetI18n } from '@/i18n/request';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import ProductSortWrap from '@/components/page/product/product-sort-wrap';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const cookie = await cookies();
-  const lang = cookie.get('COOKIE_NAME')?.value;
+  const lang = await getLocale();
   if (!lang || lang === 'ru') {
     return (await GetChannelWeb('C35707016420921344')).metadata;
   } else {
@@ -35,7 +32,6 @@ export default async function ProductsPage({
     sortBy: sortBy?.toString() ?? 'createTime',
     sort: sort ? sort as SortDirection : 'DESC'
   })
-
 
   return (
     <div className="container mx-auto">

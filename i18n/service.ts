@@ -20,7 +20,6 @@ export async function setUserLocale(locale: I18N, websiteId:string, websiteNo:st
   cookie.set(COOKIE_NAME, locale);
   cookie.set(COOKIE_WEBSITE_ID, websiteId);
   cookie.set(COOKIE_WEBSITE_NO, websiteNo);
-
 }
 
 export async function routerSetLocale(response: NextResponse, locale: I18N, websiteId:string, websiteNo:string) {

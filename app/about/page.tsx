@@ -2,18 +2,16 @@ import Our from "@/components/page/about/our";
 import WhyChoose from "@/components/page/about/why-choose";
 import TextImageBox from "@/components/text-image-box";
 import { GetI18n } from "@/i18n/request";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { GetChannelWeb } from "../api/server/server";
-import { cookies } from "next/headers";
 import { Metadata } from "next";
 
 
 export async function generateMetadata(): Promise<Metadata> {
-  const cookie = await cookies();
-  const lang = cookie.get('COOKIE_NAME')?.value;
+  const lang = await getLocale();
   if (!lang || lang === 'ru') {
     return (await GetChannelWeb('C35707170632896512')).metadata;
-  }else{
+  } else {
     return (await GetChannelWeb('C35069256630669312')).metadata;
   }
 }

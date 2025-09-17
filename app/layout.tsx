@@ -5,7 +5,7 @@ import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navbar";
 import { UIProviders } from "@/providers/ui-providers";
 import { getLocale } from "next-intl/server";
-import { GetCurWebsite, GetI18NList } from "./api/server/server";
+import { GetI18NList } from "./api/server/server";
 import { NextIntlClientProvider } from "next-intl";
 import PageFooter from "@/components/page-footer";
 import CurrentWebsiteProvider from "@/providers/website-provider";
@@ -25,8 +25,6 @@ export default async function RootLayout({
 }) {
   const locale = await getLocale();
   const i18nlist = await GetI18NList();
-  const curWebsite = await GetCurWebsite();
-
   return (
     <html suppressHydrationWarning lang="en">
       <head />
@@ -37,7 +35,7 @@ export default async function RootLayout({
         )}
       >
         <NextIntlClientProvider>
-          <CurrentWebsiteProvider website={curWebsite}>
+          <CurrentWebsiteProvider lang={locale}>
             <UIProviders locale={locale} themeProps={{ attribute: "class", defaultTheme: "dark" }}>
               <div className="relative flex flex-col h-screen">
                 <Navbar i18nList={i18nlist} lang={locale} />

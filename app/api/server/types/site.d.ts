@@ -45,4 +45,5 @@ declare interface WebChannel{
 declare type CurWebsiteNumbers ={
     websiteId:string,
     websiteNo:string,
+    language:string,
 }

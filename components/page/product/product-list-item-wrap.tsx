@@ -1,12 +1,14 @@
 
 'use client'
 import { Image } from "@heroui/react";
+import { useTranslations } from "next-intl";
 export default function ProductListItemWrap({
     product
 }: Readonly<{
     product: ProductContent
 }>) {
-    const specifications = (product.proSpec ?? '').split('\n');
+    //const specifications = (product.proSpec ?? '').split('\n');
+    const b = useTranslations('Components.Button')
     return (
         <div
             key={product.id}
@@ -17,7 +19,7 @@ export default function ProductListItemWrap({
             </div>
             <div className="p-2 flex flex-col gap-4">
                 <div className="flex-1">
-                    <h3 className="text-xl mb-2">{product.proName}</h3>
+                    <h3 className="text-xl mb-2 text-gray-100">{product.proName}</h3>
                     <p>{product.proIntroduction}</p>
                 </div>
                 <div className="flex justify-center items-center pb-2">
@@ -25,7 +27,7 @@ export default function ProductListItemWrap({
                         href={`/product/${product.id}`}
                         className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-full transition"
                     >
-                        View Details
+                        {b('btn_learn_more')}
                     </a>
                 </div>
             </div>

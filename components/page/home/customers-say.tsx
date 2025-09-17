@@ -3,7 +3,7 @@ export default function CustomersSay() {
         <>
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">What Our Customers Say</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="bg-gray-800 p-8 rounded-xl">
+                <div className="bg-gray-500 dark:bg-gray-800 p-8 rounded-xl">
                     <div className="flex items-center mb-4">
                         {[...Array(5)].map((_, i) => (
                             <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -17,13 +17,13 @@ export default function CustomersSay() {
                     <div className="flex items-center">
                         <div className="bg-gray-200 border-2 border-dashed rounded-xl w-12 h-12 mr-4" />
                         <div>
-                            <h4 className="font-bold">Alex Johnson</h4>
-                            <p className="text-gray-400 text-sm">Vaper for 3 years</p>
+                            <h4 className="font-bold text-gray-100">Alex Johnson</h4>
+                            <p className="text-gray-300 text-sm">Vaper for 3 years</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-gray-800 p-8 rounded-xl">
+                <div className="bg-gray-500 dark:bg-gray-800 p-8 rounded-xl">
                     <div className="flex items-center mb-4">
                         {[...Array(5)].map((_, i) => (
                             <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -37,13 +37,13 @@ export default function CustomersSay() {
                     <div className="flex items-center">
                         <div className="bg-gray-200 border-2 border-dashed rounded-xl w-12 h-12 mr-4" />
                         <div>
-                            <h4 className="font-bold">Sarah Williams</h4>
-                            <p className="text-gray-400 text-sm">Vaper for 1 year</p>
+                            <h4 className="font-bold text-gray-100">Sarah Williams</h4>
+                            <p className="text-gray-300 text-sm">Vaper for 1 year</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-gray-800 p-8 rounded-xl">
+                <div className="bg-gray-500 dark:bg-gray-800 p-8 rounded-xl">
                     <div className="flex items-center mb-4">
                         {[...Array(5)].map((_, i) => (
                             <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -57,8 +57,8 @@ export default function CustomersSay() {
                     <div className="flex items-center">
                         <div className="bg-gray-200 border-2 border-dashed rounded-xl w-12 h-12 mr-4" />
                         <div>
-                            <h4 className="font-bold">Michael Chen</h4>
-                            <p className="text-gray-400 text-sm">Vaper for 5 years</p>
+                            <h4 className="font-bold text-gray-100">Michael Chen</h4>
+                            <p className="text-gray-300 text-sm">Vaper for 5 years</p>
                         </div>
                     </div>
                 </div>

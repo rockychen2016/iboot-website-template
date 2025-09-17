@@ -3,18 +3,16 @@ import ContactInfo from "@/components/page/contact/contact-info";
 import LocationCard from "@/components/page/contact/location-card";
 import { GetChannelWeb } from "../api/server/server";
 import { Metadata } from "next";
-import { cookies } from "next/headers";
+import { getLocale } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const cookie = await cookies();
-  const lang = cookie.get('COOKIE_NAME')?.value;
+  const lang = await getLocale();
   if (!lang || lang === 'ru') {
-    return (await GetChannelWeb('C35707170632896512')).metadata;
-  }else{
     return (await GetChannelWeb('C35707297082773504')).metadata;
+  } else {
+    return (await GetChannelWeb('C35069319696224256')).metadata;
   }
 }
-
 
 export default function ContactPage() {
   return (

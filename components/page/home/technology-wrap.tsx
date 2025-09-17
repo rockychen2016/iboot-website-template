@@ -12,7 +12,7 @@ export default function TechnologyWrap() {
                         t("title")
                     }
                 </h2>
-                <p className="text-gray-300 text-lg mb-6">
+                <p className="dark:text-gray-300 text-lg mb-6">
                     {t('desc')}
                 </p>
                 <ul className="space-y-4">

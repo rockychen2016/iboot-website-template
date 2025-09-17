@@ -1,11 +1,11 @@
 import { getHttpOpts, getHttpOptsByHeaders, HttpClient, HttpToken, ResultModel } from "@/utils/http";
 import { NextRequest, NextResponse } from "next/server";
-import { urlParamToJson } from "@/utils/string";
+import { randomString, urlParamToJson } from "@/utils/string";
 import { API, APIMAP } from "./api";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { routerSetLocale } from "@/i18n/service";
-import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { ChannelPageContent, HomePageContent, ProductPageContent } from "./types/web-page";
+import { defaultLocale } from "@/i18n/config";
 
 export const startRequest = async (method: 'GET' | 'POST', request: NextRequest) => {
     const m: string = request.nextUrl.searchParams.get('m') ?? 'unkown';
@@ -35,7 +35,7 @@ export const startRequest = async (method: 'GET' | 'POST', request: NextRequest)
     if (method === 'GET') {
         const body = request.nextUrl.searchParams.toString();
         const params = urlParamToJson(body.toString(), ['m']);
-        console.debug('Get >>>> ', JSON.stringify(params));
+        //console.debug('Get >>>> ', JSON.stringify(params));
         res = await http.get({
             url: url,
             data: params,
@@ -92,15 +92,15 @@ export const startRequest = async (method: 'GET' | 'POST', request: NextRequest)
     if (res.success) {
         //eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data: any = res.data;
-        switch (m) {
-            case APIMAP[API.curWebsite]:
+        switch (url) {
+            case APIMAP[API[API.curWebsite]]:
                 const website = data as Website;
                 const lang = website.language.replaceAll('_', '-');
                 routerSetLocale(response, lang as I18N, website.id, website.websiteNo);
                 return response;
-            case APIMAP[API.login]:
+            case APIMAP[API[API.login]]:
                 return http.setToken(data, response);
-            case APIMAP[API.logout]:
+            case APIMAP[API[API.logout]]:
                 return http.cleanToken(response);
             default:
                 break;
@@ -110,13 +110,12 @@ export const startRequest = async (method: 'GET' | 'POST', request: NextRequest)
 }
 
 const doGet = async <T>(api: API, opts?: {
-    data?: Record<string, string>,
-    callback?: (result: T, cookie: ReadonlyRequestCookies) => void
+    data?: Record<string, string>
 }) => {
     const url = APIMAP[API[api]];
-    const heads = await headers();
     const cookieStore = await cookies();
-    const http = new HttpClient(getHttpOptsByHeaders(heads));
+    const headsObj = getHttpOptsByHeaders(cookieStore);
+    const http = new HttpClient(headsObj);
     const token: HttpToken | undefined = http.getTokenByCookies(cookieStore);
     const res = await http.get<T>({
         "url": url,
@@ -125,13 +124,95 @@ const doGet = async <T>(api: API, opts?: {
     });
     if (res.success) {
         const data = res.data!;
-        if (opts?.callback) {
-            opts.callback(data, cookieStore);
-        }
         return data;
     }
     throw res.msg
 }
+
+const doPost = async <T>(api: API, opts?: {
+    data?: Record<string, string>,
+}) => {
+    const url = APIMAP[API[api]];
+    const cookieStore = await cookies();
+    const headsObj = getHttpOptsByHeaders(cookieStore);
+    const http = new HttpClient(headsObj);
+    const token: HttpToken | undefined = http.getTokenByCookies(cookieStore);
+    const res = await http.post<T>({
+        "url": url,
+        "data": opts?.data,
+        "token": token
+    });
+    if (res.success) {
+        const data = res.data!;
+        return data;
+    }
+    throw res.msg
+}
+
+export const Logger = async (path: string, locale: string, request: NextRequest) => {
+    const params = request.nextUrl.searchParams;
+    const referer = request.headers.get('referer') || '';
+    const userAgent = request.headers.get('user-agent') || '';
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const realIp = request.headers.get('x-real-ip');
+    const ip = forwardedFor?.split(',')[0]?.trim() || realIp || 'unknown';
+    console.log("URI >>> ", path, ', Referer >>> ', referer, ', User-Agent >>> ', userAgent, ', IP >>> ', ip, ", Locale >>>", locale, ', Params >>> ', JSON.stringify(Object.fromEntries(params)));
+
+    //TODO 记录日志到数据库
+    const p: Record<string, string> = {
+        "uri": path,
+        "referer": referer,
+        "userAgent": userAgent,
+        "ipAddress": ip,
+        "language": locale,
+        "params": JSON.stringify(Object.fromEntries(params))
+    };
+    try {
+        await doPost<undefined>(API.logger, { data: p });
+    } catch (err) {
+        console.error('Logger error >>> ', err);
+    }
+}
+
+export const SetRequestHeader = async (request: NextRequest, response:NextResponse) => {
+    const locale = request.cookies.get('NEXT_LOCALE')?.value;
+    if(locale && locale.length > 0){
+        request.headers.set('lang', locale);
+    }else{
+        request.headers.set('lang', defaultLocale);
+        response.cookies.set('NEXT_LOCALE', defaultLocale)
+    }
+
+    const deviceId = request.cookies.get('NEXT_DEVICE_ID')?.value;
+    if (deviceId && deviceId.length > 0) {
+        request.headers.set('dvid', deviceId);
+    } else {
+        const dvid = randomString(10);
+        request.headers.set('dvid', dvid);
+        response.cookies.set('NEXT_DEVICE_ID', dvid);
+    }
+
+    const websiteId = request.cookies.get('NEXT_WEBSITE_ID')?.value;
+    const websiteNo = request.cookies.get('NEXT_WEBSITE_NO')?.value;
+    if (websiteId && websiteId.length > 0 && websiteNo && websiteNo.length > 0) {
+        request.headers.set('webid', websiteId);
+        request.headers.set('webno', websiteNo);
+    }else{
+        const model = await GetCurWebsite();
+        const websiteId = model.id ;//'C35705332558860288'; //process.env.DEFAULT_WEBSITE_ID || 'default-website-id';
+        const websiteNo = model.websiteNo; //'4900003854'; //process.env.DEFAULT_WEBSITE_NO || 'default-website-no';
+        request.headers.set('webid', websiteId);
+        request.headers.set('webno', websiteNo);
+        const lang = model.language.replaceAll('_','-');
+        request.headers.set('lang', lang);
+        
+        response.cookies.set('NEXT_LOCALE', lang)
+        response.cookies.set('NEXT_WEBSITE_ID', websiteId);
+        response.cookies.set('NEXT_WEBSITE_NO', websiteNo);
+    }
+}
+
+
 
 /**
  * 获取I18N网站列表
@@ -295,6 +376,8 @@ export const GetProductsByGroup = async (groupId: string) => {
         }
     });
 }
+
+
 
 
 

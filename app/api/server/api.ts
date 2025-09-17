@@ -1,6 +1,8 @@
 export enum API {
     login,
     logout,
+    register,
+    logger,
     curWebsite,
     i18nList,
     getChannelList,
@@ -18,6 +20,7 @@ export const APIMAP: Record<string, string> = {
     "login": "login",
     "logout": "logout",
     "register": "guest/register",
+    "logger": "guest/site/logger",
     "curWebsite": "guest/site/currentWebSite",
     "i18nList": "guest/site/i18nList",
     "getChannelList": "guest/site/getChannelList",
