@@ -48,7 +48,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --fix",
-    "postinstall": "node scripts/create-env-files.js"
+    "postinstall": "node scripts/create-env-files.js && npm run remove-postinstall"
   },
   "dependencies": {
     "@heroui/button": "2.2.24",
