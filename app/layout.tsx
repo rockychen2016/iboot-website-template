@@ -5,7 +5,7 @@ import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navbar";
 import { UIProviders } from "@/providers/ui-providers";
 import { getLocale } from "next-intl/server";
-import { GetI18NList } from "./api/server/server";
+import { GetCurWebsite, GetI18NList } from "./api/server/server";
 import { NextIntlClientProvider } from "next-intl";
 import PageFooter from "@/components/page-footer";
 import CurrentWebsiteProvider from "@/providers/website-provider";
@@ -25,6 +25,7 @@ export default async function RootLayout({
 }) {
   const locale = await getLocale();
   const i18nlist = await GetI18NList();
+  const curWebsite = await GetCurWebsite();
   return (
     <html suppressHydrationWarning lang="en">
       <head />
@@ -42,7 +43,7 @@ export default async function RootLayout({
                 <main className="container mx-auto max-w-7xl pt-16 px-4 lg:px-8 flex-grow">
                   {children}
                 </main>
-                <PageFooter />
+                <PageFooter website={curWebsite} />
               </div>
             </UIProviders>
           </CurrentWebsiteProvider>

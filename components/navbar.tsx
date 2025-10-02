@@ -13,7 +13,6 @@ import NextLink from "next/link";
 import clsx from "clsx";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
-import Logo from "./logo";
 import I18nList from "./i18n-list";
 import { GetI18n } from "@/i18n/request";
 import SearchInput from "./search-input";
@@ -28,15 +27,15 @@ export const Navbar = ({
 }) => {
 
   return (
-    <HeroUINavbar maxWidth="xl" position="sticky">
+    <HeroUINavbar maxWidth="2xl" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-3" href="/">
-            <Logo />
-            <p className="font-bold text-inherit">FUNTASTE</p>
+          {/* <Logo /> */}
+            <p className="font-bold text-3xl text-inherit">iBoot</p>
           </NextLink>
         </NavbarBrand>
-        <ul className="hidden lg:flex gap-4 justify-start">
+        <ul className="hidden lg:flex gap-4 justify-start pl-4">
           {siteConfig.navItems.map(async (item) => (
             <NavbarItem key={item.href}>
               <NextLink

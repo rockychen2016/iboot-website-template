@@ -2,15 +2,15 @@
 import Share from "@/components/share"
 import { useCurWebsiteContext } from "@/providers/website-provider";
 import { useTranslations } from "next-intl"
+import { Image } from "@heroui/react";
 
 
 export default function ContactInfo() {
-    //const t = async (key:string)=>await GetI18n("Website.Page.Contact", key)
-    const t = useTranslations('Website.Page.Contact');
+    const t = useTranslations('Components.ContactInfo');
     const website = useCurWebsiteContext();
     return (
         <>
-            <h2 className="text-2xl font-bold mb-6">{t('title')}</h2>
+            {/* <h2 className="text-2xl font-bold mb-6">{t('title')}</h2> */}
             <p className="mb-8">
                 {t('desc')}
             </p>
@@ -70,6 +70,12 @@ export default function ContactInfo() {
 
             <div className="mt-12">
                 <h3 className="text-xl font-bold mb-6">Follow Us</h3>
+                {
+                    website.contactQrCode && website.contactQrCode.length > 0 ?
+                        <div className="flex flex-col gap-2 pl-1">
+                            <Image src={website.contactQrCode} alt="contact us qrcode" width={100} height={100} radius="none" />
+                        </div> : null
+                }
                 <div className="flex space-x-4">
                     <Share />
                 </div>

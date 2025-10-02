@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 
 export default function ContactForm() {
-    const t = useTranslations('Website.InteractionTips.ContactForm');
+    const t = useTranslations('Components.ContactForm');
     const b = useTranslations('Components.Button')
 
     const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -27,13 +27,13 @@ export default function ContactForm() {
         }
         showAlert(iAlert, t('error'), 'error');
 
-    }, [])
+    }, [iAlert, t, showAlert])
 
 
     return (
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8">
-            <h2 className="text-2xl font-bold mb-6">Send us a Message</h2>
-
+        <div className="bg-gray-50 border-1 border-gray-100 dark:bg-gray-900 dark:border-0 rounded-md p-6">
+            <h2 className="text-2xl font-bold mb-6">{t('title')}</h2>
+            <p className="text-xs">{t('description')}</p>
             {submitSuccess && (
                 <div className="bg-green-900 text-green-200 p-4 rounded-lg mb-6">
                     <div className="flex items-center">
@@ -75,7 +75,7 @@ export default function ContactForm() {
                     maxLength={200}
                 />
                 <div className="py-4 w-full flex justify-center items-center">
-                    <Button type="submit" isLoading={isSubmitting} size="lg" radius="full" color="secondary">
+                    <Button isDisabled={submitSuccess} type="submit" isLoading={isSubmitting} size="lg" radius="full" color="secondary">
                         {b('btn_submit')}
                     </Button>
                 </div>

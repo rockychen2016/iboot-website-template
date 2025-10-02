@@ -1,7 +1,7 @@
 import { GetI18n } from "@/i18n/request";
 
 export default async function LocationCard() {
-    const t = async (key:string)=>await GetI18n("Website.Page.Contact", key)
+    const t = async (key:string)=>await GetI18n("Components.LocationCard", key)
     return (
         <div className="bg-gray-200 dark:bg-gradient-to-r from-purple-900 to-indigo-800 h-96 flex items-center justify-center">
             <div className="text-center">

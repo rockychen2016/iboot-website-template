@@ -1,9 +1,11 @@
 'use client'
 import { useCurWebsiteContext } from "@/providers/website-provider"
 import { useTranslations } from "next-intl";
+import Share from "./share";
+import { Image } from "@heroui/react";
 
 export default function FooterContact() {
-    const t = useTranslations('Website.Footer');
+    const t = useTranslations('Website.Footer.BottomNavbar');
     const curWebsite = useCurWebsiteContext();
     return (
         <>
@@ -37,6 +39,16 @@ export default function FooterContact() {
                     <span>{curWebsite.contactEmail}</span>
                 </li>
             </ul>
+            {
+                curWebsite.contactQrCode && curWebsite.contactQrCode.length > 0 ? 
+                <div className="flex flex-col gap-2 pt-3 pl-1">
+                    <p className="text-xs">{t('ContactQr')}</p>
+                    <Image src={curWebsite.contactQrCode} alt="contact us qrcode" width={100} height={100} radius="none" />
+                </div>:null
+            }
+            <div className="flex space-x-4 pt-5">
+                <Share />
+            </div>
         </>
     )
 }

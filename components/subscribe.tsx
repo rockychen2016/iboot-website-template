@@ -8,15 +8,14 @@ import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 
 export default function Subscribe() {
-    const t = useTranslations('Website.Page.Home.Subscribe');
-    const tips = useTranslations('Website.InteractionTips.Subscribe')
+    const t = useTranslations('Components.Subscribe');
     const [isSubmiting, setIsSubmiting] = useState(false);
     const [email, setEmail] = useState<string>('');
     const iAlert = useAlertMessage();
 
     const onSubmit = useCallback(async () => {
         if (email.length === 0) {
-            showAlert(iAlert, tips('enterError'), 'error');
+            showAlert(iAlert, t('enterError'), 'error');
             return;
         }
         const model: SubscribeUser = {
@@ -29,15 +28,15 @@ export default function Subscribe() {
         setIsSubmiting(false);
         if (res) {
             setEmail('');
-            showAlert(iAlert, tips('success'),'success');
+            showAlert(iAlert, t('submitSuccess'),'success');
             return;
         }
-        showAlert(iAlert, tips('error'),'error')
-    }, [email, iAlert, tips])
+        showAlert(iAlert, t('submitFail'),'error')
+    }, [email, iAlert, t])
 
     return (
-        <div className="dark:bg-gradient-to-r from-purple-700 to-indigo-800 rounded-3xl p-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+        <div className="dark:bg-gradient-to-r from-purple-700 to-indigo-800 rounded-3xl py-10 px-8 text-center">
+            <h2 className="text-3xl md:text-3xl font-bold mb-6">
                 {
                     t('title')
                 }
@@ -49,7 +48,7 @@ export default function Subscribe() {
             </p>
             <div className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-4">
                 <Input size="lg" color="secondary" type="email" placeholder={t('inputPaceHold')} value={email} onValueChange={setEmail} />
-                <Button isLoading={isSubmiting} fullWidth size="lg" radius="full" color="secondary" onPress={onSubmit}>{t('Subscribe')}</Button>
+                <Button  isLoading={isSubmiting}  size="lg" radius="full" color="secondary" onPress={onSubmit}>{t('btnSubmit')}</Button>
             </div>
         </div>
     );

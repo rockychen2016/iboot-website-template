@@ -1,4 +1,4 @@
-import { FC, HTMLAttributes } from "react";
+import {HTMLAttributes } from "react";
 
 
 interface RichWrapProps extends HTMLAttributes<HTMLDivElement> {
@@ -14,7 +14,7 @@ export default function RichWrap({
 
     const cleanHtml = sanitizeHtml(richText);
     return (
-        <div {...props} dangerouslySetInnerHTML={{
+        <div {...props} className="rich-wrap" dangerouslySetInnerHTML={{
             __html: cleanHtml
         }}></div>
     );

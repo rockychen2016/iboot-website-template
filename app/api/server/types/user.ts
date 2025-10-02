@@ -61,6 +61,7 @@ export interface User {
     longitude?: number,
     deviceId?: string,
     tokenExpired?:number,
+    mustChangePwd?:boolean
 }
 
 

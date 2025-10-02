@@ -1,3 +1,7 @@
+/**
+ * 服务端渲染API
+ */
+
 import { getHttpOpts, getHttpOptsByHeaders, HttpClient, HttpToken, ResultModel } from "@/utils/http";
 import { NextRequest, NextResponse } from "next/server";
 import { randomString, urlParamToJson } from "@/utils/string";
@@ -174,11 +178,11 @@ export const Logger = async (path: string, locale: string, request: NextRequest)
     }
 }
 
-export const SetRequestHeader = async (request: NextRequest, response:NextResponse) => {
+export const SetRequestHeader = async (request: NextRequest, response: NextResponse) => {
     const locale = request.cookies.get('NEXT_LOCALE')?.value;
-    if(locale && locale.length > 0){
+    if (locale && locale.length > 0) {
         request.headers.set('lang', locale);
-    }else{
+    } else {
         request.headers.set('lang', defaultLocale);
         response.cookies.set('NEXT_LOCALE', defaultLocale)
     }
@@ -197,15 +201,15 @@ export const SetRequestHeader = async (request: NextRequest, response:NextRespon
     if (websiteId && websiteId.length > 0 && websiteNo && websiteNo.length > 0) {
         request.headers.set('webid', websiteId);
         request.headers.set('webno', websiteNo);
-    }else{
+    } else {
         const model = await GetCurWebsite();
-        const websiteId = model.id ;//'C35705332558860288'; //process.env.DEFAULT_WEBSITE_ID || 'default-website-id';
+        const websiteId = model.id;//'C35705332558860288'; //process.env.DEFAULT_WEBSITE_ID || 'default-website-id';
         const websiteNo = model.websiteNo; //'4900003854'; //process.env.DEFAULT_WEBSITE_NO || 'default-website-no';
         request.headers.set('webid', websiteId);
         request.headers.set('webno', websiteNo);
-        const lang = model.language.replaceAll('_','-');
+        const lang = model.language.replaceAll('_', '-');
         request.headers.set('lang', lang);
-        
+
         response.cookies.set('NEXT_LOCALE', lang)
         response.cookies.set('NEXT_WEBSITE_ID', websiteId);
         response.cookies.set('NEXT_WEBSITE_NO', websiteNo);
@@ -213,10 +217,9 @@ export const SetRequestHeader = async (request: NextRequest, response:NextRespon
 }
 
 
-
 /**
  * 获取I18N网站列表
- * @returns I18N网站列表
+ * @returns I18N网站列表 Array<I18NWebSite>
  */
 export const GetI18NList = async () => {
     const res = await doGet<Array<I18NWebSite>>(API.i18nList)
@@ -237,7 +240,7 @@ export const GetCurWebsite = async () => {
 const metaData = (name: string, seo?: SeoProps) => {
     return {
         title: {
-            default: `${name}-${(seo?.title || ''.length > 0 ? `-${seo?.title}` : '')}`,
+            default: `${name}-${(seo?.title || ''.length > 0 ? `${seo?.title}` : '')}`,
             template: `%s - ${name}`,
         },
         keywords: seo?.keywords ?? '',
@@ -249,7 +252,7 @@ const metaData = (name: string, seo?: SeoProps) => {
 }
 
 /**
- * 获取网站元信息
+ * 获取网站元信息及详情内容
  * @returns 
  */
 export const GetHomeWeb = async (): Promise<HomePageContent> => {
@@ -263,8 +266,14 @@ export const GetHomeWeb = async (): Promise<HomePageContent> => {
     throw Error('An error occurred on the web page.')
 }
 
-export const GetChannelWeb = async (channelId: string): Promise<ChannelPageContent> => {
-    const res = await doGet<WebChannel>(API.getChannel, { data: { "channelId": channelId } })
+/**
+ * 通过栏目ID获取栏目详情(单页内容)
+ * @param channelId     拦目ID
+ * @param showChildren  是否显示下级栏目
+ * @returns 
+ */
+export const GetChannelById = async (channelId: string, showChildren?: boolean): Promise<ChannelPageContent> => {
+    const res = await doGet<WebChannel>(API.getChannelById, { data: { "channelId": channelId, "showChildren": showChildren ? 'true' : 'false' } })
     if (res) {
         return {
             metadata: metaData(res.name, res.seoProps),
@@ -274,31 +283,35 @@ export const GetChannelWeb = async (channelId: string): Promise<ChannelPageConte
     throw Error('An error occurred on the web page.')
 }
 
-export const GetProductDetailWeb = async (productId: string, attachmentType?: AttachmentType): Promise<ProductPageContent> => {
-    const res = await doGet<ProductContent>(API.getProduct, {
-        data: {
-            "proId": productId,
-            "attachmentType": attachmentType ?? ''
-        }
-    });
+/**
+ * 通过栏目URI获取栏目详情
+ * @param uri  栏目URI,如/product
+ * @param showChildren  是否显示下级样栏目
+ * @returns 
+ */
+export const GetChannelByUrl = async (uri: string, showChildren?: boolean): Promise<ChannelPageContent> => {
+    const res = await doGet<WebChannel>(API.getChannelByUrl, { data: { "uri": uri, "showChildren": showChildren ? 'true' : 'false' } });
     if (res) {
         return {
-            metadata: metaData(res.proName, res.seoProps),
+            metadata: metaData(res.name, res.seoProps),
             content: res
         }
     }
     throw Error('An error occurred on the web page.')
 }
 
+
 /**
  * 获取栏目列表
  * @param channelNo 如果为空则取根栏目,否则获取下一级栏目(只是一级)
- * @returns 
+ * @param showChildren 是否获取子栏目
+ * @returns Array<WebChannel>
  */
-export const GetWebChannelList = async (channelNo?: string) => {
-    const res = await doGet<Array<WebChannel>>(API.getChannelList, {
+export const GetWebChannelListByNo = async (channelNo?: string, showChildren?: boolean) => {
+    const res = await doGet<Array<WebChannel>>(API.getChannelListByNo, {
         data: {
-            "channelNo": channelNo ?? ''
+            "channelNo": channelNo ?? '',
+            "showChildren": showChildren ? 'true' : 'false'
         }
     });
     if (res) {
@@ -307,6 +320,23 @@ export const GetWebChannelList = async (channelNo?: string) => {
     return []
 }
 
+/**
+ * 依URI获取下级栏目列表
+ * @param uri -uri 如 "/product"
+ * @returns Array<WebChannel>
+ */
+export const GetWebChannelListByUri = async (uri: string) => {
+    const res = await doGet<Array<WebChannel>>(API.getChannelListByUri, {
+        data: {
+            "uri": uri,
+            "showChildren": 'true'
+        }
+    });
+    if (res) {
+        return [...res]
+    }
+    return []
+}
 
 
 /**
@@ -344,7 +374,7 @@ export const GetProductForPage = async ({
 /**
  * 通过分组编号分页获取产品
  * @param param0 
- * @returns 
+ * @returns PageInfo<ProductContent>
  */
 export const GetProductForPageByGroup = async ({
     groupNo,
@@ -367,7 +397,7 @@ export const GetProductForPageByGroup = async ({
 /**
  * 通过分组编号获取产品列表
  * @param groupId 
- * @returns 
+ * @returns Array<ProductContent>
  */
 export const GetProductsByGroup = async (groupId: string) => {
     return await doGet<Array<ProductContent>>(API.searchProductByGroup, {
@@ -377,9 +407,46 @@ export const GetProductsByGroup = async (groupId: string) => {
     });
 }
 
+/**
+ * 获详产品详情
+ * @param productId      -产品ID 
+ * @param attachmentType -为空表示获取所有附件类型。获取附件类型  'image' | 'video' | 'audio' | 'file';
+ * @returns ProductContent
+ */
+export const GetProductDetailWeb = async (productId: string, attachmentType?: AttachmentType): Promise<ProductPageContent> => {
+    const res = await doGet<ProductContent>(API.getProduct, {
+        data: {
+            "proId": productId,
+            "attachmentType": attachmentType ?? ''
+        }
+    });
+    if (res) {
+        return {
+            metadata: metaData(res.proName, res.seoProps),
+            content: res
+        }
+    }
+    throw Error('An error occurred on the web page.')
+}
 
-
-
-
-
-
+/**
+ * 获取评论内容, 
+ * contentNo(内容编号)为空表示不限内容的评论，不为空表示获取指定内容的论评
+ * rowCount(获取记录数，为空表示所有评论)
+ * @param param0 {contentNo?:string, rowCount?:number}
+ * @returns 
+ */
+export const GetReviewList = async ({
+    contentNo,
+    rowCount = 3,
+}: Readonly<{
+    contentNo?: string,
+    rowCount?: number,
+}>) => {
+    return await doGet<Array<Reviews>>(API.getReviewList, {
+        data: {
+            "entityNo": contentNo ?? '',
+            "rowCount": rowCount?.toString() ?? ''
+        }
+    });
+}

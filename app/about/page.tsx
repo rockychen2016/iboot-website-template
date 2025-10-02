@@ -1,42 +1,33 @@
-import Our from "@/components/page/about/our";
-import WhyChoose from "@/components/page/about/why-choose";
-import TextImageBox from "@/components/text-image-box";
+import WhyChoose from "@/components/about/why-choose";
 import { GetI18n } from "@/i18n/request";
-import { getLocale, getTranslations } from "next-intl/server";
-import { GetChannelWeb } from "../api/server/server";
 import { Metadata } from "next";
+import { GetChannelByUrl } from "../api/server/server";
+import AboutUs from "@/components/about/about-us";
+import TextImageBox from "@/components/text-image-box";
 
 
 export async function generateMetadata(): Promise<Metadata> {
-  const lang = await getLocale();
-  if (!lang || lang === 'ru') {
-    return (await GetChannelWeb('C35707170632896512')).metadata;
-  } else {
-    return (await GetChannelWeb('C35069256630669312')).metadata;
-  }
+  return (await GetChannelByUrl('/about')).metadata
 }
 
 
 export default async function AboutPage() {
   const t = async (key: string) => await GetI18n('Website.Page.About', key);
-  const b = await getTranslations('Website.Page.About');
+  const content = (await GetChannelByUrl('/about')).content;
+  const bannerUrl = (content.banners ?? []).length > 0 ? content.banners![0].fileUrl : content.thumbUrl;
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">{t('title')}</h1>
-      <TextImageBox title={await t('Story.title')} content={
-        b.rich('Story.desc', {
-          li: (chunks) => <p className="mb-6">{chunks}</p>
-        })
-      } />
-      <TextImageBox left={false} src="/about.png" title={await t('Mission.title')} content={
-        b.rich('Mission.desc', {
-          li: (chunks) => <p className="mb-6">{chunks}</p>
-        })
-      } />
-      <div className="mb-16">
-        <WhyChoose brand="FUNTASTE" />
+    <>
+      <div className="hidden">
+        <h1>{t('title')}</h1>
+        {content.content ?? ''}
       </div>
-      <Our />
-    </div>
+      <div className="mb-16">
+        <TextImageBox title={await t('title')} src={bannerUrl} content={content.content ?? ''} />
+      </div>
+      <div className="mb-16">
+        <WhyChoose />
+      </div>
+      <AboutUs />
+    </>
   );
 }

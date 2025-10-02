@@ -1,4 +1,4 @@
-import { GetWebChannelList } from "@/app/api/server/server";
+import { GetWebChannelListByNo } from "@/app/api/server/server";
 
 
 export default async function ProductCategoryWrap({
@@ -6,7 +6,7 @@ export default async function ProductCategoryWrap({
 }:{
     catid?:string
 }) {
-    const ProChannels = await GetWebChannelList('8900028384');
+    const ProChannels = await GetWebChannelListByNo('8900028384');
     
     return (
         <div className="flex space-x-2 md:space-x-4 justify-center min-w-max">

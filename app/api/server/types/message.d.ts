@@ -14,7 +14,9 @@ declare interface Reviews{
     name:string,
     rating:number,
     message:string,
-    createTime?:string
+    createTime?:string,
+    avatar?:string,
+    uid?:string
 }
 
 declare interface ContactUs{

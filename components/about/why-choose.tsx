@@ -1,12 +1,8 @@
 import { GetI18n } from "@/i18n/request";
 import clsx from "clsx";
 
-export default async function WhyChoose({
-    brand
-}: Readonly<{
-    brand: string,
-}>) {
-    const t = async (key: string) => await GetI18n('Website.Page.About.WhyChoose', key);
+export default async function WhyChoose() {
+    const t = async (key: string) => await GetI18n('Components.WhyChoose', key);
     const data = [
         {
             title: await t('Premium.title'),
@@ -26,7 +22,7 @@ export default async function WhyChoose({
     ]
     return (
         <>
-            <h2 className="text-2xl font-bold mb-8 text-center">Why Choose {brand}</h2>
+            <h2 className="text-2xl font-bold mb-8 text-center"> {t('title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {
                     data.map((item, index) => <Card key={item.title + index} title={item.title} desc={item.desc} css={item.css} />)

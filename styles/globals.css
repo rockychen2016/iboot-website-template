@@ -1,3 +1,19 @@
 @import "tailwindcss";
+.rich-wrap p{
+    display: block;
+    margin: 10px auto;
+}
+.rich-wrap p:empty{
+    padding: 10px 0;
+}
 
+.table-wrapper{
+    width: 100%;
+}
+.table-wrapper th,.table-wrapper td{
+    border: 1px solid var(--color-gray-300);
+}
+.dark .table-wrapper th, .dark .table-wrapper td{
+        border: 1px solid var(--color-gray-600);
+}
 @config "../tailwind.config.js"

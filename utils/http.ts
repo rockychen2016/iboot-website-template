@@ -10,7 +10,6 @@ import { randomString, urlDecode, urlParamToJson } from "./string";
 import { User } from "@/app/api/server/types/user";
 import { _CURRENT_WEBSITE_KEY } from "@/providers/website-provider";
 import { _DEVICE_ID_KEY } from "@/providers/device-provider";
-import { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
 import { defaultLocale } from "@/i18n/config";
 
 type CSRFToken = {
@@ -562,7 +561,7 @@ export class HttpClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setToken(data: User & { token: string, extFields: Record<string, any> }, response: NextResponse) {
-        const { id, name, username, nickname, sex, headImg, token, lastLoginTime, tokenExpired, deviceId, userType } = data;
+        const { id, name, username, nickname, sex, headImg, token, lastLoginTime, tokenExpired, deviceId, userType, mustChangePwd } = data;
         const loginUser: User = {
             id: id,
             name: name,
@@ -580,7 +579,8 @@ export class HttpClient {
             userFrom: 1,
             needToReview: false,
             socketOnline: false,
-            createTime: ""
+            createTime: "",
+            mustChangePwd: mustChangePwd
         };
         response.cookies.set('token', token, {
             httpOnly: true,

@@ -8,17 +8,21 @@ import { Input } from "@heroui/input";
 import { Button } from "@heroui/react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { useRouter } from "next/navigation";
-import { Toast } from "@/utils/toast";
+import { useTranslations } from "next-intl";
+import { useAlertMessage } from "@/providers/alert-modal-provider";
+import { showAlert } from "@/utils/alert-utils";
 export default function SearchInput() {
+    const t = useTranslations('Components.SearchInput')
     const [keyword, setKeyword] = useState('');
     const router = useRouter();
-    const onSearchHandle = useCallback(()=>{
-        if(!keyword || keyword.length === 0){
-            Toast('Please enter the keywords!', 'error');
+    const iAlert = useAlertMessage();
+    const onSearchHandle = useCallback(() => {
+        if (!keyword || keyword.length === 0) {
+            showAlert(iAlert, t('input_error'), 'error');
             return;
         }
-        router.push('/product/search?keyword=' + keyword)
-    },[keyword])
+        router.push('/search?keyword=' + keyword)
+    }, [keyword, t, iAlert, showAlert, router])
     return (
         <Input
             aria-label="Search"
@@ -28,7 +32,7 @@ export default function SearchInput() {
                 input: "text-sm",
             }}
             endContent={
-                <Button size="sm" radius="md" isIconOnly onPress={()=>onSearchHandle()}><AiOutlineSearch size={16} /></Button>
+                <Button size="sm" radius="md" isIconOnly onPress={() => onSearchHandle()}><AiOutlineSearch size={16} /></Button>
             }
             labelPlacement="outside"
             placeholder="Search..."

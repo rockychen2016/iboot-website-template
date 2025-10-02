@@ -5,16 +5,18 @@ export default function Logo() {
   return (
     <>
       <Image 
-        radius="sm" 
+        radius="none" 
         src="/logo_black.png" 
         alt="logo" 
         className="block dark:hidden"
+        height={30}
       />
       <Image 
-        radius="sm" 
-        src="/logo_while.png" 
+        radius="none" 
+        src="/logo_white.png" 
         alt="logo" 
         className="hidden dark:block"
+        height={30}
       />
     </>
   );

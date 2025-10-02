@@ -1,20 +1,20 @@
 import { GetI18n } from "@/i18n/request";
 
 
-export default async function Our() {
-    const t = async (key: string) => await GetI18n('Website.Page.About.Our', key)
+export default async function AboutUs() {
+    const t = async (key: string) => await GetI18n('Components.AboutUs', key)
     const data = [{
         "label": await t('data.Members'),
-        "value": "50+"
+        "value": "10+"
     }, {
         "label": await t('data.Customers'),
-        "value": "1M+"
+        "value": "1K+"
     }, {
         "label": await t('data.Products'),
-        "value": "50+"
+        "value": "100+"
     }, {
         "label": await t('data.Countries'),
-        "value": "8"
+        "value": "15+"
     }]
     return (
         <div className="bg-gray-100 dark:bg-gradient-to-r from-purple-700 to-indigo-800 rounded-3xl p-8 md:p-12 mb-16">

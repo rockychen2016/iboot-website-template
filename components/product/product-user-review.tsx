@@ -2,7 +2,7 @@
 import { GetReviewList, UserComment } from "@/app/api/server/client";
 import { useAlertMessage } from "@/providers/alert-modal-provider";
 import { showAlert } from "@/utils/alert-utils";
-import { iGet } from "@/utils/http";
+import { dateFormat } from "@/utils/date-utils";
 import { Alert, Button, Form, Input, Select, SelectItem, Textarea } from "@heroui/react";
 import { useCallback, useEffect, useState } from "react";
 import { AiOutlineSend } from "react-icons/ai";
@@ -50,18 +50,18 @@ function Reviews({
     return (
 
         <div className="space-y-8 mb-8">
-            {data.map((review) => (
-                <div key={review.id} className="bg-gray-400 dark:bg-gray-800 rounded-2xl p-8">
+            {data.map((item) => (
+                <div key={item.id} className="bg-gray-400 dark:bg-gray-800 rounded-2xl p-8">
                     <div className="flex justify-between items-start mb-4">
-                        <h3 className="text-lg font-bold">{review.name}</h3>
-                        <span className="text-gray-800 dark:text-gray-400 text-sm">{review.createTime}</span>
+                        <h3 className="text-lg font-bold">{item.name}</h3>
+                        <span className="text-gray-800 dark:text-gray-400 text-sm">{dateFormat(new Date(item.createTime!), 'yy/MM/dd')}</span>
                     </div>
                     <div className="flex items-center mb-4">
                         <div className="flex">
-                            {[...Array(5)].map((_, i) => (
+                            {[...Array(item.rating)].map((_, i) => (
                                 <svg
                                     key={i}
-                                    className={`w-5 h-5 ${i < review.rating ? 'text-yellow-400' : 'text-gray-600'}`}
+                                    className={`w-5 h-5 ${i < item.rating ? 'text-yellow-400' : 'text-gray-600'}`}
                                     fill="currentColor"
                                     viewBox="0 0 20 20"
                                 >
@@ -70,7 +70,7 @@ function Reviews({
                             ))}
                         </div>
                     </div>
-                    <p className="text-gray-300">{review.message}</p>
+                    <p className="text-gray-300">{item.message}</p>
                 </div>
             ))}
         </div>
